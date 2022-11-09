@@ -24,7 +24,12 @@
       ></messageItemVue>
     </div>
     <div class="d-grid gap-2">
-      <button id="faker" type="button" class="btn btn-outline-secondary btn-lg">
+      <button
+        id="faker"
+        type="button"
+        class="btn btn-outline-secondary btn-lg"
+        @click="generateFakeData"
+      >
         填入假資料
       </button>
     </div>
@@ -40,9 +45,10 @@
 <script setup>
 import messageItemVue from "../components/message-board/message-item.vue";
 import messageEditorVue from "../components/message-board/message-editor.vue";
-import { ref } from "vue";
+import MessageFakerService from "../services/message-faker.service";
+import { reactive, ref } from "vue";
 
-let messages = [
+let messages = reactive([
   {
     author: "author",
     time: new Date().toISOString(),
@@ -68,7 +74,7 @@ let messages = [
     time: new Date().toISOString(),
     content: "content",
   },
-];
+]);
 
 const action = ref("");
 const currentIndex = ref(-1);
@@ -108,6 +114,13 @@ function openRemoveModal(index) {
   currentIndex.value = index;
   editing.value = messages[index];
   action.value = "remove";
+}
+
+function generateFakeData() {
+  console.log("generateFakeData");
+  const faker = new MessageFakerService();
+  const generated = faker.generate();
+  messages.push(...generated);
 }
 </script>
 
