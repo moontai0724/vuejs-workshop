@@ -19,8 +19,8 @@
         :content="message.content"
         :author="message.author"
         :time="message.time"
-        @edit="openEditModal()"
-        @remove="openRemoveModal()"
+        @edit="openEditModal(index)"
+        @remove="openRemoveModal(index)"
       ></messageItemVue>
     </div>
     <div class="d-grid gap-2">
@@ -29,13 +29,20 @@
       </button>
     </div>
   </div>
-  <!-- Modal here -->
+  <messageEditorVue
+    :action="action"
+    :author="editing?.author"
+    :content="editing?.content"
+    @submit="onModalSubmit"
+  ></messageEditorVue>
 </template>
 
 <script setup>
 import messageItemVue from "../components/message-board/message-item.vue";
+import messageEditorVue from "../components/message-board/message-editor.vue";
+import { ref } from "vue";
 
-const messages = [
+let messages = [
   {
     author: "author",
     time: new Date().toISOString(),
@@ -63,12 +70,44 @@ const messages = [
   },
 ];
 
-function openEditModal() {
-  console.log("openEditModal");
+const action = ref("");
+const currentIndex = ref(-1);
+const editing = ref(null);
+
+function onModalSubmit(modifiedMessage) {
+  console.log("onModalSubmit", modifiedMessage);
+  if (action.value === "create") {
+    messages.push({ ...modifiedMessage, time: new Date().toISOString() });
+  } else if (action.value === "edit") {
+    editing.value.time = new Date().toISOString();
+    editing.value.author = modifiedMessage.author;
+    editing.value.content = modifiedMessage.content;
+  } else if (action.value === "remove") {
+    messages.splice(currentIndex.value, 1);
+  }
+  action.value = "";
+  currentIndex.value = -1;
+  editing.value = null;
 }
 
-function openRemoveModal() {
+function openCreateModal() {
+  console.log("openCreateModal");
+  editing.value = null;
+  action.value = "create";
+}
+
+function openEditModal(index) {
+  console.log("openEditModal");
+  currentIndex.value = index;
+  editing.value = messages[index];
+  action.value = "edit";
+}
+
+function openRemoveModal(index) {
   console.log("openRemoveModal");
+  currentIndex.value = index;
+  editing.value = messages[index];
+  action.value = "remove";
 }
 </script>
 
